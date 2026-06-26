@@ -29,10 +29,10 @@ def main() -> None:
     )
     parser.add_argument("--model",   default="models/drone_yolo.pt",
                         help="Path to YOLO .pt model weights")
-    parser.add_argument("--conf",    type=float, default=0.5,
+    parser.add_argument("--conf",    type=float, default=0.3,
                         help="Detection confidence threshold")
-    parser.add_argument("--width",   type=int, default=640)
-    parser.add_argument("--height",  type=int, default=480)
+    parser.add_argument("--width",   type=int, default=896)
+    parser.add_argument("--height",  type=int, default=896)
     parser.add_argument("--display", action="store_true", default=True,
                         help="Show OpenCV preview window (default: True)")
     args = parser.parse_args()
