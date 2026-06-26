@@ -1,0 +1,25 @@
+# ─── Drone Tracker — Python Dependencies ────────────────────────────────────
+# Install with:
+#   pip install -r requirements.txt --extra-index-url https://www.piwheels.org/simple
+
+# ── Computer Vision & ML ──────────────────────────────────────────────────────
+opencv-python>=4.9.0        # Camera capture + frame rendering
+ultralytics>=8.2.0          # YOLOv8/v10/v11 inference engine
+numpy>=1.26.0               # Array operations
+
+# ── MAVLink ───────────────────────────────────────────────────────────────────
+pymavlink>=2.4.41           # Low-level MAVLink serial/UDP protocol
+
+# ── Inference device note ─────────────────────────────────────────────────────
+# On the Pi 5 (CPU only) torch will use the CPU wheel automatically.
+# No CUDA packages needed.  When an AI HAT is added, install its Python SDK
+# separately and update tracker/config.py device="<hat_device_string>".
+
+# ── Gazebo camera backends (desktop PC only) ──────────────────────────────────
+# The tracker receives camera frames via H.264/RTP UDP — no gz-transport or
+# pygazebo needed on the Pi.
+#
+# On the DESKTOP, to receive or process the stream locally for debugging:
+#   apt install ffmpeg                              # ffmpeg fallback backend
+#   apt install libgstreamer1.0-dev \               # GStreamer (preferred)
+#               libgstreamer-plugins-base1.0-dev

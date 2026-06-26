@@ -1,0 +1,41 @@
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Runtime outputs ───────────────────────────────────────────────────────────
+logs/
+debug_frames/
+
+# ── ArduPilot / MAVLink runtime files ─────────────────────────────────────────
+*.tlog
+*.tlog.raw
+eeprom.bin
+mav.tlog*
+
+# ── YOLO model weights (large binaries) ──────────────────────────────────────
+models/*.pt
+models/*.onnx
+models/*.tflite
+!models/.gitkeep
+
+# ── IDE / editor ─────────────────────────────────────────────────────────────
+.vscode/browse.vc.db
+.idea/
+*.swp
+*~
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Temporary SDP files (created by ffmpeg backend at runtime) ────────────────
+*.sdp
