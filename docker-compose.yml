@@ -1,0 +1,72 @@
+# Drone Tracker — Raspberry Pi 5 deployment
+#
+# Default service (`drone-tracker`) runs `--mode hardware` (Pi Camera +
+# serial MAVLink) and needs no network access.
+#
+# The `drone-tracker-gazebo` service (behind the "gazebo" profile) runs
+# `--mode gazebo`: tracker on the Pi 5, Gazebo + ArduPilot SITL on a desktop
+# PC on the same LAN. Set DESKTOP_IP before starting it:
+#
+#   DESKTOP_IP=192.168.1.50 docker compose --profile gazebo up --build -d drone-tracker-gazebo
+#
+# Hardware mode:
+#   docker compose up --build -d
+#   docker compose logs -f
+#
+# Notes for the Pi 5:
+# - /dev/ttyAMA0 is the flight-controller serial link; /dev/video0 is the
+#   Pi Camera. Adjust these paths if your wiring differs.
+# - `dialout`/`video` group membership inside the container matches typical
+#   Raspberry Pi OS device permissions for serial/camera access.
+# - The gazebo service uses `network_mode: host` so it can receive the
+#   H.264/RTP camera stream (UDP 5600) and talk MAVLink (UDP 14550) to the
+#   desktop PC — this only works with Docker Engine on Linux (Raspberry Pi
+#   OS). On the desktop, point Gazebo's GstCameraPlugin and SITL's extra
+#   MAVLink output at the Pi's IP (see gazebo/README_GAZEBO.md).
+
+services:
+  drone-tracker:
+    build: .
+    image: drone-tracker:latest
+    container_name: drone-tracker
+    restart: unless-stopped
+    devices:
+      - /dev/ttyAMA0:/dev/ttyAMA0
+      - /dev/video0:/dev/video0
+    group_add:
+      - dialout
+      - video
+    volumes:
+      - ./models:/app/models:ro
+      - ./logs:/app/logs
+    command:
+      - "--mode"
+      - "hardware"
+      - "--model"
+      - "models/drone_yolo.pt"
+      - "--device"
+      - "/dev/ttyAMA0"
+      - "--baud"
+      - "921600"
+
+  drone-tracker-gazebo:
+    profiles: ["gazebo"]
+    build: .
+    image: drone-tracker:latest
+    container_name: drone-tracker-gazebo
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./models:/app/models:ro
+      - ./logs:/app/logs
+    command:
+      - "--mode"
+      - "gazebo"
+      - "--model"
+      - "models/drone_yolo.pt"
+      - "--sitl-conn"
+      - "udp:${DESKTOP_IP:-CHANGE_ME}:14550"
+      - "--gst-host"
+      - "0.0.0.0"
+      - "--gst-port"
+      - "5600"
