@@ -32,14 +32,14 @@ echo "==> Installing systemd unit(s), pointed at ${PROJECT_DIR} (venv: ${VENV_DI
 sed \
     -e "s/^User=pi/User=${SERVICE_USER}/" \
     -e "s/^Group=pi/Group=${SERVICE_USER}/" \
-    -e "s|WorkingDirectory=.*|WorkingDirectory=${PROJECT_DIR}|" \
-    -e "s|/opt/drone-tracker/venv|${VENV_DIR}|" \
+    -e "s|__PROJECT_DIR__|${PROJECT_DIR}|" \
+    -e "s|__VENV_DIR__|${VENV_DIR}|" \
     "${PROJECT_DIR}/systemd/drone-tracker.service" > /etc/systemd/system/drone-tracker.service
 sed \
     -e "s/^User=pi/User=${SERVICE_USER}/" \
     -e "s/^Group=pi/Group=${SERVICE_USER}/" \
-    -e "s|WorkingDirectory=.*|WorkingDirectory=${PROJECT_DIR}|" \
-    -e "s|/opt/drone-tracker/venv|${VENV_DIR}|" \
+    -e "s|__PROJECT_DIR__|${PROJECT_DIR}|" \
+    -e "s|__VENV_DIR__|${VENV_DIR}|" \
     "${PROJECT_DIR}/systemd/drone-tracker-gazebo.service" > /etc/systemd/system/drone-tracker-gazebo.service
 
 mkdir -p /etc/drone-tracker
