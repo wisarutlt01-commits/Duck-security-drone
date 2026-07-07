@@ -1,0 +1,21 @@
+[Unit]
+Description=Drone Tracker (gazebo mode - tracker on Pi, Gazebo+SITL on desktop)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/opt/drone-tracker
+# DESKTOP_IP is read from /etc/drone-tracker/gazebo.env (set it there before starting)
+EnvironmentFile=/etc/drone-tracker/gazebo.env
+ExecStart=/opt/drone-tracker/venv/bin/python3 main.py --mode gazebo --model models/drone_yolo.pt --sitl-conn udp:${DESKTOP_IP}:14550 --gst-host 0.0.0.0 --gst-port 5600
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=drone-tracker-gazebo
+
+[Install]
+WantedBy=multi-user.target

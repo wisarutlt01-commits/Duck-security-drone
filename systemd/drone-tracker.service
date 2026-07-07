@@ -1,0 +1,19 @@
+[Unit]
+Description=Drone Tracker (hardware mode - Pi Camera + MAVLink serial)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+SupplementaryGroups=dialout video
+WorkingDirectory=/opt/drone-tracker
+ExecStart=/opt/drone-tracker/venv/bin/python3 main.py --mode hardware --model models/drone_yolo.pt --device /dev/ttyAMA0 --baud 921600
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=drone-tracker
+
+[Install]
+WantedBy=multi-user.target
