@@ -10,6 +10,7 @@ Two run modes:
 """
 
 from dataclasses import dataclass, field
+from typing import Optional
 
 
 @dataclass
@@ -85,6 +86,7 @@ class SystemConfig:
 
     # ── Display ──────────────────────────────────────────────────────────────
     show_display: bool = False
+    web_port: Optional[int] = None   # if set, serve annotated frames as MJPEG on this port
 
     # ── Gazebo / UDP stream settings ─────────────────────────────────────────
     # Set gst_udp_host to the Gazebo PC's LAN IP when running networked

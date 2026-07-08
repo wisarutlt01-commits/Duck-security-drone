@@ -75,7 +75,12 @@ def parse_args():
     parser.add_argument("--height",     type=int, default=480)
     parser.add_argument("--fps",        type=int, default=30)
     parser.add_argument("--display",    action="store_true",
-                        help="Show OpenCV preview window")
+                        help="Show OpenCV preview window (requires Qt/X11)")
+    parser.add_argument("--web-port",   type=int, default=None,
+                        metavar="PORT",
+                        help="Serve annotated frames as MJPEG over HTTP on this "
+                             "port (e.g. 8080) — view at http://<host>:PORT/. "
+                             "No X11/Qt needed; works headless over SSH/Tailscale.")
     return parser.parse_args()
 
 
@@ -93,6 +98,7 @@ def main() -> int:
         frame_height      = args.height,
         target_fps        = args.fps,
         show_display      = args.display,
+        web_port          = args.web_port,
         sitl_connection   = args.sitl_conn,
         gst_udp_host      = args.gst_host,
         gst_udp_port      = args.gst_port,

@@ -113,6 +113,14 @@ class VisionSystem:
         )
         self.log.info("Model loaded and warmed up")
 
+        # ── Optional headless MJPEG viewer ────────────────────────────────────
+        self._broadcaster = None
+        web_port = getattr(cfg, "web_port", None)
+        if web_port:
+            from tracker.web_stream import FrameBroadcaster, start_server
+            self._broadcaster = FrameBroadcaster()
+            start_server(self._broadcaster, "0.0.0.0", web_port)
+
     # ── Public API (thread-safe) ───────────────────────────────────────────────
 
     @property
@@ -269,12 +277,17 @@ class VisionSystem:
                 det = self._process_results(results)
                 self._update_detection(det)
 
-                if self.cfg.show_display:
+                if self.cfg.show_display or self._broadcaster is not None:
                     annotated = self._draw_overlay(frame.copy(), det)
-                    cv2.imshow("Drone Tracker", annotated)
-                    if cv2.waitKey(1) & 0xFF == ord("q"):
-                        self.log.info("Display quit key — triggering shutdown")
-                        self.shutdown.set()
+
+                    if self.cfg.show_display:
+                        cv2.imshow("Drone Tracker", annotated)
+                        if cv2.waitKey(1) & 0xFF == ord("q"):
+                            self.log.info("Display quit key — triggering shutdown")
+                            self.shutdown.set()
+
+                    if self._broadcaster is not None:
+                        self._broadcaster.update(annotated)
 
                 self._update_fps()
 
