@@ -29,17 +29,18 @@ class SystemConfig:
     mode: str = "hardware"
 
     # ── Model ────────────────────────────────────────────────────────────────
-    # For high-speed intercept, prefer ONNX (.onnx) or TFLite INT8 (.tflite)
-    # exported at imgsz=320 — 2–3× faster than .pt on the Pi 5 CPU.
-    # Export once with: model.export(format="onnx", imgsz=320, simplify=True)
-    model_path:     str   = "models/drone_yolo.pt"
+    # ONNX export benchmarked on Pi 5 CPU: still the main FPS bottleneck
+    # (inference-only isolation test showed ~7-8 FPS vs. ~400+ FPS with
+    # inference skipped). Dropping imgsz further trades accuracy for FPS —
+    # re-export whenever this changes: model.export(format="onnx", imgsz=256, simplify=True)
+    model_path:     str   = "models/drone_yolo.onnx"
     conf_thresh:    float = 0.20      # YOLO confidence minimum
     iou_thresh:     float = 0.45      # NMS IoU threshold
     # Class indices to track. {0:'drone', 1:'interveptor-drone', 2:'fixedwing'}
     target_classes: tuple = (0, 1)
-    # imgsz=1280 works well on GPU; on Pi CPU drop to 640 (target must be larger
-    # in frame). 896 is the trained resolution.
-    infer_size:     int   = 896
+    # Must match the imgsz the ONNX model was exported with (fixed, dynamic=False).
+    # 896 was the trained resolution; 256 trades detection range/accuracy for FPS.
+    infer_size:     int   = 256
     # YOLO inference device.
     # Valid values: "cpu" | future AI HAT accelerator string (e.g. "hailo")
     # Default is "cpu" — Pi 5 has no GPU. Change to your accelerator when the
@@ -56,6 +57,11 @@ class SystemConfig:
     serial_device:  str   = "/dev/ttyAMA0"
     baud_rate:      int   = 921600    # high baud for low-latency at 50 Hz control
     heartbeat_timeout: float = 5.0
+    # Attempts to wait for the first heartbeat at connect() time, heartbeat_timeout
+    # seconds apart. The FC often isn't booted yet when this script starts (e.g.
+    # started the moment the battery goes in), so retry instead of aborting on
+    # the first miss.
+    heartbeat_connect_retries: int = 6
     mavlink_system_id: int = 255
     mavlink_comp_id:   int = 0
 

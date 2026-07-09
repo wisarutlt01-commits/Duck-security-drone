@@ -93,8 +93,27 @@ class MAVLinkInterface:
                     **conn_kwargs,
                 )
 
-            self.log.info("Waiting for heartbeat...")
-            self._conn.wait_heartbeat(timeout=self.cfg.heartbeat_timeout)
+            retries = max(1, self.cfg.heartbeat_connect_retries)
+            hb = None
+            for attempt in range(1, retries + 1):
+                self.log.info(
+                    f"Waiting for heartbeat (attempt {attempt}/{retries}, "
+                    f"timeout={self.cfg.heartbeat_timeout}s)..."
+                )
+                hb = self._conn.wait_heartbeat(timeout=self.cfg.heartbeat_timeout)
+                if hb is not None:
+                    break
+                self.log.warning(
+                    f"No heartbeat on attempt {attempt}/{retries} "
+                    f"— FC may still be booting, retrying"
+                )
+
+            if hb is None:
+                self.log.error(
+                    f"No heartbeat after {retries} attempts "
+                    f"— check connection ({conn_str})"
+                )
+                return False
             self._last_hb_ts = time.monotonic()
             self.log.info(
                 f"Heartbeat received from system {self._conn.target_system}, "

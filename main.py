@@ -20,6 +20,14 @@ Two run modes:
         --gst-host 0.0.0.0 --gst-port 5600
 """
 
+import os
+
+# Must be set before onnxruntime/torch/numpy load their threading runtime —
+# Pi 5 is quad-core; reserve 1 core for the GStreamer decode + MAVLink/control
+# threads instead of letting inference claim all 4.
+os.environ.setdefault("OMP_NUM_THREADS", "3")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "3")
+
 import time
 import signal
 import logging
